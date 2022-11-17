@@ -1,5 +1,7 @@
 *-backups
 fp-info-cache
+fp-lib-table
+sym-lib-table
 *.step
 .esphome
 wifi.yaml
