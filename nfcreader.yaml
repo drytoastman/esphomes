@@ -3,6 +3,7 @@ wifi: !include wifi.yaml
 substitutions:
   name: metest
   friendly_name: TagReader
+  relay_name: unconnected
 
 
 globals:
@@ -33,7 +34,7 @@ script:
           red:   !lambda return id(led_home_red);
           green: !lambda return id(led_home_green);
           blue:  !lambda return id(led_home_blue);
-   
+
 
 esphome:
   name: $name
@@ -43,14 +44,24 @@ esphome:
   project:
     name: drytoastman.tag_reader
     version: "1.0"
-  on_boot:
-    priority: -10
+
+interval:
+  - interval: 2s
     then:
-    - wait_until:
-        api.connected:
-    - logger.log: API is connected!
-    - rtttl.play: "success:d=32,o=5,b=100:c,g,b"
-    - script.execute: led_set_home
+      - if:
+          condition:
+            and:
+              - api.connected
+              - light.is_off: activity_led
+          then:
+            - script.execute: led_set_home
+      - if:
+          condition:
+            and:
+              - not: api.connected
+              - light.is_on: activity_led
+          then:
+            - light.turn_off: activity_led
 
 # Define buttons for writing tags via HA
 button:
@@ -60,8 +71,7 @@ button:
 
 # Enable logging
 logger:
-  # level: VERY_VERBOSE
-  # level: VERBOSE
+  level: INFO
 
 # Enable Home Assistant API
 api:
@@ -177,14 +187,15 @@ light:
   variant: WS2812
   pin: D8
   num_leds: 1
-  flash_transition_length: 500ms
   type: GRB
   id: activity_led
   name: "${friendly_name} LED"
   restore_mode: ALWAYS_OFF
+  default_transition_length: 0s
+  flash_transition_length: 0s
 
 switch:
   - platform: gpio
     id: relay
-    name: "Relay Switch"
+    name: "${relay_name} Switch"
     pin: D6

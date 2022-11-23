@@ -3,82 +3,44 @@ wifi: !include wifi.yaml
 
 substitutions:
   name: lockcontrol
-  friendly_name: Lock Control
+  friendly_name: SliderLock
 
 esphome:
   name: $name
   platform: ESP8266
   board: d1_mini
 
-  # Automatically add the mac address to the name
-  # so you can use a single firmware for all devices
-  name_add_mac_suffix: true
-
-  # This will allow for (future) project identification,
-  # configuration and updates.
   project:
-    name: "drytoastman.mestuff"
-    version: "0.0.1"
-# If buzzer is enabled, notify on api connection success
-  on_boot:
-    priority: -10
+    name: "drytoastman.lock_control"
+    version: "1.0"
+
+interval:
+  - interval: 2s
     then:
-    #- wait_until:
-    #    api.connected:
-    - logger.log: API is connected!
-    - light.turn_on:
-        id: activity_led
-        brightness: 100%
-        red: 0%
-        green: 0%
-        blue: 100%
-        flash_length: 500ms
+      - if:
+          condition:
+            and:
+              - api.connected
+              - light.is_off: activity_led
+          then:
+            - light.turn_on: { id: activity_led, brightness: 30%, red: 0%, green: 0%, blue: 100% }
+      - if:
+          condition:
+            and:
+              - not: api.connected
+              - light.is_on: activity_led
+          then:
+            - light.turn_off: activity_led
 
-# Define switches to control LED and buzzer from HA
-switch:
-- platform: gpio
-  id: lock
-  name: "${friendly_name} Lock"
-  pin: D5
 
-- platform: template
-  name: "${friendly_name} LED enabled"
-  id: led_enabled
-  icon: mdi:alarm-light-outline
-  optimistic: true
-  restore_state: true
-  entity_category: config
+logger:
+api:
+ota:
+text_sensor: !include statuses.yaml
 
-# Define buttons for writing tags via HA
 button:
   - platform: restart
     name: "${friendly_name} Restart"
-    entity_category: config
-
-# Enable logging
-logger:
-  # level: VERY_VERBOSE
-  # level: VERBOSE
-
-# Enable Home Assistant API
-api:
-
-# Enable OTA upgrade
-ota:
-
-i2c:
-  scan: False
-  frequency: 400kHz
-
-globals:
-  - id: source
-    type: std::string
-  - id: url
-    type: std::string
-  - id: info
-    type: std::string
-
-
 
 binary_sensor:
   - platform: status
@@ -86,51 +48,39 @@ binary_sensor:
     entity_category: diagnostic
 
   - platform: gpio
+    name: "${friendly_name} User Request"
     pin:
-      number: D7
+      number: D1
       inverted: true
       mode:
         input: true
         pullup: true
-    name: "user request"
     filters:
       - delayed_on: 10ms
     on_press:
       then:
-        - switch.toggle:
-            id: lock
-        - light.turn_on:
-            id: activity_led
-            brightness: 100%
-            red: 0%
-            green: 0%
-            blue: 100%
-            flash_length: 500ms
+        - switch.toggle: { id: lock }
+        - light.turn_on: { id: activity_led, brightness: 100%, red: 0%, green: 100%, blue: 0%, flash_length: 500ms }
 
 
-text_sensor:
-  - platform: version
-    hide_timestamp: true
-    name: "${friendly_name} ESPHome Version"
-    entity_category: diagnostic
-  - platform: wifi_info
-    ip_address:
-      name: "${friendly_name} IP Address"
-      icon: mdi:wifi
-      entity_category: diagnostic
-    ssid:
-      name: "${friendly_name} Connected SSID"
-      icon: mdi:wifi-strength-2
-      entity_category: diagnostic
+# the relay actuation
+switch:
+- platform: gpio
+  id: lock
+  name: "${friendly_name} Lock"
+  pin: D2
+
 
 # Configure LED
 light:
 - platform: neopixelbus
   variant: WS2812
-  pin: D6
+  pin: D3
   num_leds: 1
-  flash_transition_length: 500ms
   type: GRB
   id: activity_led
   name: "${friendly_name} LED"
   restore_mode: ALWAYS_OFF
+  default_transition_length: 0s
+  flash_transition_length: 0s
+
