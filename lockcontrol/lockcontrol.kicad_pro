@@ -57,6 +57,7 @@
       ],
       "drc_exclusions": [
         "courtyards_overlap|109490075|88492225|159570c8-9cdf-41c6-abed-ca7c47ca696d|0bd2da97-a25b-45d2-b32d-2a4b5c6045c2",
+        "courtyards_overlap|113554075|66648225|0339c02c-d508-4434-a352-aa36568c053c|0bd2da97-a25b-45d2-b32d-2a4b5c6045c2",
         "courtyards_overlap|116348075|68172225|0339c02c-d508-4434-a352-aa36568c053c|0bd2da97-a25b-45d2-b32d-2a4b5c6045c2"
       ],
       "meta": {
@@ -125,7 +126,8 @@
         0.0,
         0.1524,
         0.3048,
-        0.4572
+        0.4572,
+        0.6096
       ],
       "via_dimensions": [
         {
