@@ -65,7 +65,7 @@ button:
 
 # Enable logging
 logger:
-  level: INFO
+#  level: INFO
 
 # Enable Home Assistant API
 api:

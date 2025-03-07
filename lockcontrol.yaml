@@ -3,7 +3,7 @@ wifi: !include wifi.yaml
 
 substitutions:
   name: lockcontrol
-  friendly_name: SliderLock
+  friendly_name: LockControl
 
 esphome:
   name: $name
@@ -14,23 +14,23 @@ esphome:
     name: "drytoastman.lock_control"
     version: "1.0"
 
-interval:
-  - interval: 2s
-    then:
-      - if:
-          condition:
-            and:
-              - api.connected
-              - light.is_off: activity_led
-          then:
-            - light.turn_on: { id: activity_led, brightness: 30%, red: 0%, green: 0%, blue: 100% }
-      - if:
-          condition:
-            and:
-              - not: api.connected
-              - light.is_on: activity_led
-          then:
-            - light.turn_off: activity_led
+#interval:
+#  - interval: 2s
+#    then:
+#      - if:
+#          condition:
+#            and:
+#              - api.connected
+#              - light.is_off: activity_led
+#          then:
+#            - light.turn_on: { id: activity_led, brightness: 30%, red: 0%, green: 0%, blue: 100% }
+#      - if:
+#          condition:
+#            and:
+#              - not: api.connected
+#              - light.is_on: activity_led
+#          then:
+#            - light.turn_off: activity_led
 
 
 logger:
@@ -60,7 +60,6 @@ binary_sensor:
     on_press:
       then:
         - switch.toggle: { id: lock }
-        - light.turn_on: { id: activity_led, brightness: 100%, red: 0%, green: 100%, blue: 0%, flash_length: 500ms }
 
 
 # the relay actuation
@@ -75,7 +74,7 @@ switch:
 light:
 - platform: neopixelbus
   variant: WS2812
-  pin: D3
+  pin: D8
   num_leds: 1
   type: GRB
   id: activity_led
